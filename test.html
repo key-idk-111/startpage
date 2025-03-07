@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Start Page</title>
+  <link rel="icon" href="" id="faviconTag">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #000000;
+      --card-bg: #111111;
+      --card-hover: #222222;
+      --accent: #555555;
+      --text: #AAAAAA;
+      --text-dim: #777777;
+      --text-bright: #EEEEEE;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text);
+      transition: all 0.5s ease;
+    }
+    #backgroundImage {
+      position: fixed;
+      inset: 0;
+      z-index: -10;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+    }
+    #settingsPanel {
+      transition: transform 0.3s ease-in-out;
+      transform: translateX(100%);
+    }
+    #settingsPanel.open {
+      transform: translateX(0);
+    }
+    .modal-transition {
+      transition: opacity 0.3s ease;
+    }
+    .link-card {
+      backdrop-filter: blur(8px);
+      transition: all 0.3s ease;
+    }
+    .clock-text {
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+    .glass {
+      background: rgba(30, 30, 30, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(80, 80, 80, 0.2);
+    }
+    .btn-hover {
+      transition: all 0.3s ease;
+      background-size: 200% auto;
+    }
+    .btn-hover:hover {
+      background-position: right center;
+    }
+    .slider {
+      -webkit-appearance: none;
+      height: 8px;
+      border-radius: 4px;
+      background: #333;
+      outline: none;
+      transition: all 0.3s;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .slider::-webkit-slider-thumb:hover {
+      background: #777;
+      transform: scale(1.1);
+    }
+    .color-scheme {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .color-scheme:hover {
+      transform: scale(1.1);
+    }
+    .color-scheme.active {
+      border: 2px solid white;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--card-bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: var(--accent);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div id="backgroundImage"></div>
+  <div class="flex flex-col items-center justify-center min-h-screen px-6 py-12 relative">
+    <div id="clock" class="font-bold mb-12 clock-text"></div>
+    <form id="searchForm" class="w-full max-w-xl mb-14 relative">
+      <div class="flex shadow-lg rounded-full overflow-hidden glass">
+        <input id="searchInput" type="text" placeholder="Search..." class="w-full px-6 py-4 bg-transparent focus:outline-none text-white text-lg" />
+        <button type="submit" class="px-6 py-4 bg-opacity-50 transition duration-300">
+          <i class="fa-solid fa-search"></i>
+        </button>
+      </div>
+    </form>
+    <div id="linksGrid" class="flex flex-wrap justify-center gap-6 w-full max-w-4xl"></div>
+  </div>
+  <button id="openSettingsBtn" class="fixed bottom-8 right-8 glass p-4 rounded-full shadow-lg z-10 text-gray-300 hover:text-white transition duration-300">
+    <i class="fa-solid fa-gear text-xl"></i>
+  </button>
+  <div id="settingsPanel" class="fixed top-0 right-0 h-full w-full sm:w-96 glass shadow-2xl z-50 overflow-hidden">
+    <div class="p-6 flex flex-col h-full">
+      <div class="flex justify-between items-center mb-8">
+        <h3 class="text-2xl font-bold text-gray-200">Settings</h3>
+        <button id="closeSettingsBtn" class="text-gray-400 hover:text-white p-1">
+          <i class="fa-solid fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="flex-grow space-y-8 overflow-y-auto pr-3">
+        <div class="space-y-4">
+          <label class="block text-gray-300 mb-1 font-medium">General</label>
+          <div class="glass rounded-xl p-4 space-y-4">
+            <div>
+              <label class="block text-gray-400 mb-2 text-sm">Website Title</label>
+              <input id="websiteTitleInput" type="text" class="w-full px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none" placeholder="Start Page" />
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-2 text-sm">Favicon URL</label>
+              <input id="faviconInput" type="text" class="w-full px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none" placeholder="https://..." />
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-2 text-sm">Search Target</label>
+              <select id="searchTargetSelect" class="w-full px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none">
+                <option value="new">Open in New Tab</option>
+                <option value="current">Open in Current Tab</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <label class="block text-gray-300 mb-1 font-medium">Appearance</label>
+          <div class="glass rounded-xl p-4 space-y-4">
+            <div>
+              <label class="block text-gray-400 mb-2 text-sm">Background Image URL</label>
+              <input id="bgURLInput" type="text" class="w-full px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none" placeholder="https://..." />
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-2 text-sm">Background Blur</label>
+              <input id="blurSlider" type="range" min="0" max="20" value="0" class="slider w-full" />
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-3 text-sm">Preset Color Scheme</label>
+              <div class="flex flex-wrap gap-3">
+                <div class="color-scheme active" style="background-color: #111111;" data-bg="#000000" data-card="#111111" data-accent="#555555" data-text="#AAAAAA"></div>
+                <div class="color-scheme" style="background-color: #1A1A2E;" data-bg="#0F0F1B" data-card="#1A1A2E" data-accent="#4D4D84" data-text="#C1C1D7"></div>
+                <div class="color-scheme" style="background-color: #331E36;" data-bg="#211024" data-card="#331E36" data-accent="#A6709A" data-text="#D7B9D5"></div>
+                <div class="color-scheme" style="background-color: #1E2749;" data-bg="#121630" data-card="#1E2749" data-accent="#4A62B8" data-text="#B5C0E8"></div>
+                <div class="color-scheme" style="background-color: #28313B;" data-bg="#171D22" data-card="#28313B" data-accent="#3F89C6" data-text="#A7C0D7"></div>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <label class="block text-gray-400 mb-3 text-sm">Custom Color Scheme</label>
+              <div>
+                <label class="block text-gray-400 mb-2 text-sm">Background Color</label>
+                <input id="customBgColor" type="color" class="w-full px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none" value="#000000" />
+              </div>
+              <div>
+                <label class="block text-gray-400 mb-2 text-sm">Card Color</label>
+                <input id="customCardColor" type="color" class="w-full px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none" value="#111111" />
+              </div>
+              <div>
+                <label class="block text-gray-400 mb-2 text-sm">Accent Color</label>
+                <input id="customAccentColor" type="color" class="w-full px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none" value="#555555" />
+              </div>
+              <div>
+                <label class="block text-gray-400 mb-2 text-sm">Text Color</label>
+                <input id="customTextColor" type="color" class="w-full px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none" value="#AAAAAA" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-2 text-sm">Clock Format</label>
+              <select id="clockFormatSelect" class="w-full px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none">
+                <option value="24">24-hour</option>
+                <option value="12">12-hour</option>
+                <option value="none">Hide clock</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-2 text-sm">Clock Font Size (px)</label>
+              <input id="clockFontSizeInput" type="number" class="w-full px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none" value="70" />
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-2 text-sm">Clock Color</label>
+              <input id="clockColorInput" type="color" class="w-full px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none" value="#EEEEEE" />
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-2 text-sm">Icon Size</label>
+              <input id="iconSizeSlider" type="range" min="2" max="8" value="5" class="slider w-full" />
+            </div>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <label class="block text-gray-300 mb-1 font-medium">Search</label>
+          <div class="glass rounded-xl p-4">
+            <label class="block text-gray-400 mb-2 text-sm">Search Engine URL (use %s for query)</label>
+            <input id="searchEngineInput" type="text" class="w-full px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none" placeholder="https://www.google.com/search?q=%s" />
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button class="searchPreset px-3 py-1 rounded-lg glass text-xs" data-url="https://www.google.com/search?q=%s">Google</button>
+              <button class="searchPreset px-3 py-1 rounded-lg glass text-xs" data-url="https://www.bing.com/search?q=%s">Bing</button>
+              <button class="searchPreset px-3 py-1 rounded-lg glass text-xs" data-url="https://duckduckgo.com/?q=%s">DuckDuckGo</button>
+              <button class="searchPreset px-3 py-1 rounded-lg glass text-xs" data-url="https://www.ecosia.org/search?q=%s">Ecosia</button>
+            </div>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <label class="text-gray-300 font-medium">Quick Links</label>
+            <button id="addQuickLinkBtn" class="glass hover:bg-gray-700 transition duration-300 px-3 py-1.5 rounded-lg text-white text-sm btn-hover">
+              <i class="fa-solid fa-plus mr-1"></i> Add Link
+            </button>
+          </div>
+          <div class="glass rounded-xl">
+            <ul id="quickLinksList" class="divide-y divide-gray-800"></ul>
+          </div>
+        </div>
+      </div>
+      <button id="saveSettingsBtn" class="w-full mt-6 px-4 py-3 glass rounded-lg transition font-medium btn-hover">
+        Save Settings
+      </button>
+    </div>
+  </div>
+  <div id="linkModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden modal-transition opacity-0">
+    <div class="glass rounded-xl w-96 p-6 shadow-2xl">
+      <div class="flex justify-between items-center mb-6">
+        <h3 id="linkModalTitle" class="text-xl font-bold text-white">Add Quick Link</h3>
+        <button id="closeLinkModal" class="text-gray-400 hover:text-white">
+          <i class="fa-solid fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-gray-300 mb-2 text-sm">Title</label>
+          <input id="linkTitleInput" type="text" class="w-full px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none" placeholder="Title" />
+        </div>
+        <div>
+          <label class="block text-gray-300 mb-2 text-sm">URL</label>
+          <input id="linkURLInput" type="text" class="w-full px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none" placeholder="https://..." />
+        </div>
+        <div>
+          <label class="block text-gray-300 mb-2 text-sm">Icon</label>
+          <div class="flex gap-3">
+            <input id="linkIconInput" type="text" class="flex-1 px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none" placeholder="fa-brands fa-github" />
+            <button id="iconPickerBtn" class="glass px-3 rounded-lg">
+              <i class="fa-solid fa-icons"></i>
+            </button>
+          </div>
+          <div id="iconPreview" class="mt-3 text-center text-3xl">
+            <i class="fa-solid fa-link"></i>
+          </div>
+        </div>
+        <div>
+          <label class="block text-gray-300 mb-2 text-sm">Color</label>
+          <input id="linkColorInput" type="color" class="w-full h-10 bg-black bg-opacity-30 rounded-lg cursor-pointer" value="#555555" />
+        </div>
+      </div>
+      <div class="flex justify-end mt-6 space-x-3">
+        <button id="cancelLinkModalBtn" class="px-4 py-2 glass rounded-lg transition">Cancel</button>
+        <button id="saveLinkModalBtn" class="px-4 py-2 glass rounded-lg transition btn-hover">Save</button>
+      </div>
+    </div>
+  </div>
+  <div id="iconPickerModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden modal-transition opacity-0">
+    <div class="glass rounded-xl w-11/12 max-w-3xl p-6 shadow-2xl max-h-[80vh] flex flex-col">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-white">Select an Icon</h3>
+        <button id="closeIconPickerBtn" class="text-gray-400 hover:text-white">
+          <i class="fa-solid fa-times text-xl"></i>
+        </button>
+      </div>
+      <input id="iconSearchInput" type="text" class="w-full px-4 py-2 bg-black bg-opacity-30 rounded-lg focus:outline-none mb-4" placeholder="Search icons..." />
+      <div class="overflow-y-auto flex-1">
+        <div id="iconGrid" class="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-3 py-2"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const defaultSettings = {
+      background: '',
+      searchEngine: 'https://www.google.com/search?q=%s',
+      blur: 0,
+      clockFormat: '24',
+      clockFontSize: 70,
+      clockColor: '#EEEEEE',
+      iconSize: 5,
+      colorScheme: {
+        bg: '#000000',
+        card: '#111111',
+        accent: '#555555',
+        text: '#AAAAAA'
+      },
+      title: 'Start Page',
+      favicon: '',
+      searchTarget: 'new'
+    };
+    const defaultLinks = [
+      { id: '1', title: 'YouTube', url: 'https://youtube.com', icon: 'fa-brands fa-youtube', color: '#ff0000' },
+      { id: '2', title: 'GitHub', url: 'https://github.com', icon: 'fa-brands fa-github', color: '#ffffff' },
+      { id: '3', title: 'Twitter', url: 'https://twitter.com', icon: 'fa-brands fa-twitter', color: '#1da1f2' },
+      { id: '4', title: 'Reddit', url: 'https://reddit.com', icon: 'fa-brands fa-reddit', color: '#ff4500' },
+      { id: '5', title: 'Google', url: 'https://google.com', icon: 'fa-brands fa-google', color: '#4285f4' },
+      { id: '6', title: 'Netflix', url: 'https://netflix.com', icon: 'fa-brands fa-netflix', color: '#e50914' }
+    ];
+    const iconSets = {
+      'Solid': ['fa-house','fa-user','fa-gear','fa-envelope','fa-bell','fa-calendar','fa-clock','fa-image','fa-video','fa-music','fa-file','fa-folder','fa-bookmark','fa-star','fa-heart','fa-cart-shopping','fa-search','fa-key','fa-lock','fa-shield','fa-server','fa-code','fa-terminal','fa-database','fa-cloud','fa-laptop','fa-mobile','fa-tablet','fa-tv','fa-gamepad','fa-coffee','fa-book','fa-globe','fa-plane','fa-car','fa-train','fa-bicycle','fa-building','fa-home','fa-briefcase','fa-graduation-cap','fa-wrench','fa-hammer','fa-screwdriver','fa-palette','fa-camera','fa-film','fa-newspaper','fa-map','fa-compass'],
+      'Brands': ['fa-github','fa-twitter','fa-facebook','fa-instagram','fa-youtube','fa-linkedin','fa-discord','fa-slack','fa-apple','fa-android','fa-windows','fa-linux','fa-chrome','fa-firefox','fa-edge','fa-safari','fa-amazon','fa-google','fa-spotify','fa-twitch','fa-reddit','fa-steam','fa-jira','fa-confluence','fa-figma','fa-trello','fa-behance','fa-dribbble','fa-pinterest','fa-wordpress','fa-squarespace','fa-medium','fa-whatsapp','fa-telegram','fa-tiktok','fa-snapchat','fa-dropbox','fa-airbnb','fa-uber','fa-paypal','fa-bitcoin','fa-ethereum','fa-xbox','fa-playstation','fa-nintendo-switch','fa-unity','fa-patreon','fa-kickstarter','fa-itch-io','fa-tumblr','fa-flickr']
+    };
+    let settingsData = JSON.parse(localStorage.getItem('startPageSettings')) || defaultSettings;
+    let linksData = JSON.parse(localStorage.getItem('startPageLinks')) || defaultLinks;
+    function saveSettings() {
+      localStorage.setItem('startPageSettings', JSON.stringify(settingsData));
+    }
+    function saveLinks() {
+      localStorage.setItem('startPageLinks', JSON.stringify(linksData));
+    }
+    function applyTheme() {
+      document.documentElement.style.setProperty('--bg-color', settingsData.colorScheme.bg);
+      document.documentElement.style.setProperty('--card-bg', settingsData.colorScheme.card);
+      document.documentElement.style.setProperty('--accent', settingsData.colorScheme.accent);
+      document.documentElement.style.setProperty('--text', settingsData.colorScheme.text);
+      const bgElement = document.getElementById('backgroundImage');
+      if (settingsData.background) {
+        bgElement.style.backgroundImage = `url('${settingsData.background}')`;
+        bgElement.style.filter = `blur(${settingsData.blur}px)`;
+      } else {
+        bgElement.style.backgroundImage = '';
+        bgElement.style.filter = '';
+      }
+      const clockElem = document.getElementById('clock');
+      clockElem.style.display = settingsData.clockFormat === 'none' ? 'none' : 'block';
+      clockElem.style.fontSize = settingsData.clockFontSize + 'px';
+      clockElem.style.color = settingsData.clockColor;
+      document.title = settingsData.title || document.title;
+      const faviconTag = document.getElementById('faviconTag');
+      faviconTag.href = settingsData.favicon || '';
+    }
+    function updateClock() {
+      if (settingsData.clockFormat === 'none') return;
+      const clockElem = document.getElementById('clock');
+      const now = new Date();
+      let h = now.getHours();
+      let ampm = '';
+      if (settingsData.clockFormat === '12') {
+        ampm = h >= 12 ? ' PM' : ' AM';
+        h = h % 12;
+        h = h ? h : 12;
+      }
+      const m = String(now.getMinutes()).padStart(2,'0');
+      const s = String(now.getSeconds()).padStart(2,'0');
+      h = String(h).padStart(2,'0');
+      clockElem.textContent = `${h}:${m}:${s}${ampm}`;
+    }
+    setInterval(updateClock,1000);
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    searchForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const query = encodeURIComponent(searchInput.value.trim());
+      if(query) {
+        const url = settingsData.searchEngine.replace('%s',query);
+        settingsData.searchTarget === 'new' ? window.open(url,'_blank') : window.location.href = url;
+        searchInput.value = '';
+      }
+    });
+    document.querySelectorAll('.searchPreset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const url = btn.getAttribute('data-url');
+        document.getElementById('searchEngineInput').value = url;
+      });
+    });
+    const linksGrid = document.getElementById('linksGrid');
+    function renderLinksGrid() {
+      linksGrid.innerHTML = '';
+      const iconSizeClass = `text-${settingsData.iconSize}xl`;
+      linksData.forEach(link => {
+        const a = document.createElement('a');
+        a.href = link.url;
+        a.target = settingsData.searchTarget === 'new' ? '_blank' : '_self';
+        a.className = 'link-card flex items-center justify-center p-6 glass rounded-xl hover:bg-opacity-70 shadow-lg w-20 h-20';
+        a.innerHTML = `<div class="${iconSizeClass}" style="color: ${link.color || settingsData.colorScheme.accent}"><i class="${link.icon || 'fa-solid fa-link'}"></i></div>`;
+        a.title = link.title;
+        a.addEventListener('mouseover', () => {
+          a.style.transform = 'scale(1.1)';
+        });
+        a.addEventListener('mouseout', () => {
+          a.style.transform = 'scale(1)';
+        });
+        linksGrid.appendChild(a);
+      });
+    }
+    function bindHoverEffects() {
+      document.querySelectorAll('.link-card').forEach(card => {
+        card.addEventListener('mouseenter', () => {
+          card.style.transform = 'scale(1.1)';
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = 'scale(1)';
+        });
+      });
+    }
+    const quickLinksList = document.getElementById('quickLinksList');
+    function renderQuickLinksList() {
+      quickLinksList.innerHTML = '';
+      if(linksData.length === 0) {
+        const emptyState = document.createElement('li');
+        emptyState.className = 'p-4 text-center text-gray-400';
+        emptyState.textContent = 'No links added yet';
+        quickLinksList.appendChild(emptyState);
+        return;
+      }
+      linksData.forEach((link,index) => {
+        const li = document.createElement('li');
+        li.className = 'p-3 hover:bg-gray-800 flex items-center gap-3 group';
+        li.innerHTML = `<div class="flex-shrink-0 text-xl" style="color: ${link.color || settingsData.colorScheme.accent}"><i class="${link.icon || 'fa-solid fa-link'}"></i></div>
+          <div class="flex-grow min-w-0">
+            <div class="font-medium truncate">${link.title}</div>
+            <div class="text-xs text-gray-400 truncate">${link.url}</div>
+          </div>
+          <div class="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button class="editLinkBtn p-1.5 bg-gray-700 rounded-lg hover:bg-gray-600 transition" data-index="${index}"><i class="fa-solid fa-pen-to-square"></i></button>
+            <button class="deleteLinkBtn p-1.5 bg-gray-700 rounded-lg hover:bg-red-700 transition" data-index="${index}"><i class="fa-solid fa-trash"></i></button>
+          </div>`;
+        quickLinksList.appendChild(li);
+      });
+      new Sortable(quickLinksList, {
+        animation: 150,
+        ghostClass: 'bg-gray-700',
+        onEnd: function() {
+          const newOrder = [];
+          document.querySelectorAll('#quickLinksList > li').forEach(item => {
+            if(item.querySelector('.editLinkBtn')) {
+              const oldIndex = parseInt(item.querySelector('.editLinkBtn').getAttribute('data-index'));
+              newOrder.push(linksData[oldIndex]);
+            }
+          });
+          linksData = newOrder;
+          saveLinks();
+          renderLinksGrid();
+          renderQuickLinksList();
+        }
+      });
+      bindLinkActions();
+    }
+    function bindLinkActions() {
+      document.querySelectorAll('.editLinkBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const index = btn.getAttribute('data-index');
+          openLinkModal('edit',index);
+        });
+      });
+      document.querySelectorAll('.deleteLinkBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const index = btn.getAttribute('data-index');
+          if(confirm('Are you sure you want to delete this link?')) {
+            linksData.splice(index,1);
+            saveLinks();
+            renderLinksGrid();
+            renderQuickLinksList();
+          }
+        });
+      });
+    }
+    const settingsPanel = document.getElementById('settingsPanel');
+    const openSettingsBtn = document.getElementById('openSettingsBtn');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    openSettingsBtn.addEventListener('click', () => {
+      settingsPanel.classList.add('open');
+    });
+    closeSettingsBtn.addEventListener('click', () => {
+      settingsPanel.classList.remove('open');
+    });
+    const bgURLInput = document.getElementById('bgURLInput');
+    const searchEngineInput = document.getElementById('searchEngineInput');
+    const blurSlider = document.getElementById('blurSlider');
+    const clockFormatSelect = document.getElementById('clockFormatSelect');
+    const iconSizeSlider = document.getElementById('iconSizeSlider');
+    const websiteTitleInput = document.getElementById('websiteTitleInput');
+    const faviconInput = document.getElementById('faviconInput');
+    const searchTargetSelect = document.getElementById('searchTargetSelect');
+    const clockFontSizeInput = document.getElementById('clockFontSizeInput');
+    const clockColorInput = document.getElementById('clockColorInput');
+    const customBgColor = document.getElementById('customBgColor');
+    const customCardColor = document.getElementById('customCardColor');
+    const customAccentColor = document.getElementById('customAccentColor');
+    const customTextColor = document.getElementById('customTextColor');
+    bgURLInput.value = settingsData.background;
+    searchEngineInput.value = settingsData.searchEngine;
+    blurSlider.value = settingsData.blur;
+    clockFormatSelect.value = settingsData.clockFormat;
+    iconSizeSlider.value = settingsData.iconSize;
+    websiteTitleInput.value = settingsData.title;
+    faviconInput.value = settingsData.favicon;
+    searchTargetSelect.value = settingsData.searchTarget;
+    clockFontSizeInput.value = settingsData.clockFontSize;
+    clockColorInput.value = settingsData.clockColor;
+    customBgColor.value = settingsData.colorScheme.bg;
+    customCardColor.value = settingsData.colorScheme.card;
+    customAccentColor.value = settingsData.colorScheme.accent;
+    customTextColor.value = settingsData.colorScheme.text;
+    blurSlider.addEventListener('input', () => {
+      let preview = blurSlider.nextElementSibling;
+      if(preview && preview.tagName !== 'INPUT') {
+        preview.textContent = blurSlider.value + 'px';
+      } else {
+        preview = document.createElement('div');
+        preview.textContent = blurSlider.value + 'px';
+        preview.className = 'text-xs text-center mt-1';
+        blurSlider.after(preview);
+      }
+    });
+    iconSizeSlider.addEventListener('input', () => {
+      let preview = iconSizeSlider.nextElementSibling;
+      if(preview && preview.tagName !== 'INPUT') {
+        preview.textContent = iconSizeSlider.value + 'x';
+      } else {
+        preview = document.createElement('div');
+        preview.textContent = iconSizeSlider.value + 'x';
+        preview.className = 'text-xs text-center mt-1';
+        iconSizeSlider.after(preview);
+      }
+    });
+    document.querySelectorAll('.color-scheme').forEach(scheme => {
+      scheme.addEventListener('click', () => {
+        document.querySelectorAll('.color-scheme').forEach(s => s.classList.remove('active'));
+        scheme.classList.add('active');
+        settingsData.colorScheme = {
+          bg: scheme.getAttribute('data-bg'),
+          card: scheme.getAttribute('data-card'),
+          accent: scheme.getAttribute('data-accent'),
+          text: scheme.getAttribute('data-text')
+        };
+        customBgColor.value = settingsData.colorScheme.bg;
+        customCardColor.value = settingsData.colorScheme.card;
+        customAccentColor.value = settingsData.colorScheme.accent;
+        customTextColor.value = settingsData.colorScheme.text;
+        applyTheme();
+      });
+    });
+    customBgColor.addEventListener('change', () => {
+      settingsData.colorScheme.bg = customBgColor.value;
+      applyTheme();
+    });
+    customCardColor.addEventListener('change', () => {
+      settingsData.colorScheme.card = customCardColor.value;
+      applyTheme();
+    });
+    customAccentColor.addEventListener('change', () => {
+      settingsData.colorScheme.accent = customAccentColor.value;
+      applyTheme();
+    });
+    customTextColor.addEventListener('change', () => {
+      settingsData.colorScheme.text = customTextColor.value;
+      applyTheme();
+    });
+    clockFontSizeInput.addEventListener('change', () => {
+      settingsData.clockFontSize = parseInt(clockFontSizeInput.value);
+      applyTheme();
+    });
+    clockColorInput.addEventListener('change', () => {
+      settingsData.clockColor = clockColorInput.value;
+      applyTheme();
+    });
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+    saveSettingsBtn.addEventListener('click', () => {
+      settingsData.background = bgURLInput.value.trim();
+      settingsData.searchEngine = searchEngineInput.value.trim() || 'https://www.google.com/search?q=%s';
+      settingsData.blur = parseInt(blurSlider.value);
+      settingsData.clockFormat = clockFormatSelect.value;
+      settingsData.iconSize = parseInt(iconSizeSlider.value);
+      settingsData.title = websiteTitleInput.value.trim() || document.title;
+      settingsData.favicon = faviconInput.value.trim();
+      settingsData.searchTarget = searchTargetSelect.value;
+      settingsData.clockFontSize = parseInt(clockFontSizeInput.value);
+      settingsData.clockColor = clockColorInput.value;
+      saveSettings();
+      applyTheme();
+      renderLinksGrid();
+      settingsPanel.classList.remove('open');
+    });
+    const linkModal = document.getElementById('linkModal');
+    const linkModalTitle = document.getElementById('linkModalTitle');
+    const linkTitleInput = document.getElementById('linkTitleInput');
+    const linkURLInput = document.getElementById('linkURLInput');
+    const linkIconInput = document.getElementById('linkIconInput');
+    const linkColorInput = document.getElementById('linkColorInput');
+    const iconPreview = document.getElementById('iconPreview');
+    let currentEditIndex = null;
+    document.getElementById('addQuickLinkBtn').addEventListener('click', () => {
+      openLinkModal('add');
+    });
+    document.getElementById('closeLinkModal').addEventListener('click', closeLinkModal);
+    document.getElementById('cancelLinkModalBtn').addEventListener('click', closeLinkModal);
+    document.getElementById('saveLinkModalBtn').addEventListener('click', () => {
+      const title = linkTitleInput.value.trim();
+      const url = linkURLInput.value.trim();
+      const icon = linkIconInput.value.trim();
+      const color = linkColorInput.value;
+      if(title && url) {
+        if(currentEditIndex === null) {
+          linksData.push({ id: Date.now().toString(), title, url, icon, color });
+        } else {
+          linksData[currentEditIndex] = { ...linksData[currentEditIndex], title, url, icon, color };
+        }
+        saveLinks();
+        renderLinksGrid();
+        renderQuickLinksList();
+        closeLinkModal();
+      }
+    });
+    function openLinkModal(mode, index) {
+      currentEditIndex = mode === 'edit' ? index : null;
+      if(mode === 'edit') {
+        const link = linksData[index];
+        linkModalTitle.textContent = 'Edit Quick Link';
+        linkTitleInput.value = link.title;
+        linkURLInput.value = link.url;
+        linkIconInput.value = link.icon;
+        linkColorInput.value = link.color;
+        iconPreview.innerHTML = `<i class="${link.icon}"></i>`;
+      } else {
+        linkModalTitle.textContent = 'Add Quick Link';
+        linkTitleInput.value = '';
+        linkURLInput.value = '';
+        linkIconInput.value = '';
+        linkColorInput.value = '#555555';
+        iconPreview.innerHTML = `<i class="fa-solid fa-link"></i>`;
+      }
+      linkModal.classList.remove('hidden');
+      setTimeout(() => { linkModal.classList.add('opacity-100'); linkModal.classList.remove('opacity-0'); }, 10);
+    }
+    function closeLinkModal() {
+      linkModal.classList.remove('opacity-100');
+      linkModal.classList.add('opacity-0');
+      setTimeout(() => { linkModal.classList.add('hidden'); }, 300);
+    }
+    document.getElementById('iconPickerBtn').addEventListener('click', () => {
+      populateIconGrid();
+      document.getElementById('iconPickerModal').classList.remove('hidden');
+      setTimeout(() => { document.getElementById('iconPickerModal').classList.add('opacity-100'); document.getElementById('iconPickerModal').classList.remove('opacity-0'); }, 10);
+    });
+    document.getElementById('closeIconPickerBtn').addEventListener('click', closeIconPicker);
+    function closeIconPicker() {
+      const modal = document.getElementById('iconPickerModal');
+      modal.classList.remove('opacity-100');
+      modal.classList.add('opacity-0');
+      setTimeout(() => { modal.classList.add('hidden'); }, 300);
+    }
+    linkIconInput.addEventListener('input', () => {
+      iconPreview.innerHTML = `<i class="${linkIconInput.value.trim() || 'fa-solid fa-link'}"></i>`;
+    });
+    function populateIconGrid() {
+      const iconGrid = document.getElementById('iconGrid');
+      iconGrid.innerHTML = '';
+      Object.keys(iconSets).forEach(set => {
+        iconSets[set].forEach(iconClass => {
+          const div = document.createElement('div');
+          div.className = 'p-2 text-center text-2xl cursor-pointer hover:bg-gray-700 rounded';
+          div.innerHTML = `<i class="${set === 'Brands' ? 'fa-brands' : 'fa-solid'} ${iconClass}"></i>`;
+          div.addEventListener('click', () => {
+            linkIconInput.value = `${set === 'Brands' ? 'fa-brands' : 'fa-solid'} ${iconClass}`;
+            iconPreview.innerHTML = `<i class="${linkIconInput.value.trim()}"></i>`;
+            closeIconPicker();
+          });
+          iconGrid.appendChild(div);
+        });
+      });
+    }
+    document.getElementById('iconSearchInput').addEventListener('input', (e) => {
+      const term = e.target.value.trim().toLowerCase();
+      const iconGrid = document.getElementById('iconGrid');
+      Array.from(iconGrid.children).forEach(div => {
+        div.style.display = div.innerText.toLowerCase().includes(term) ? 'block' : 'none';
+      });
+    });
+    applyTheme();
+    renderLinksGrid();
+    renderQuickLinksList();
+    updateClock();
+  </script>
+</body>
+</html>
